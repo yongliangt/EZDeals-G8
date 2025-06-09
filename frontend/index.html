@@ -28,22 +28,39 @@
 <body>
     <h1>StyleSphere Catalog</h1>
     <div id="products" class="product-list"></div>
+    <!-- get the data from dynamodb -->
     <script>
-        fetch('/api/products')
-            .then((res) => res.json())
-            .then((data) => {
-                const container = document.getElementById('products');
-                data.forEach((p) => {
-                    const div = document.createElement('div');
-                    div.className = 'product-card';
-                    div.innerHTML = `
-            <img src="${p.ImageURL}" alt="${p.Name}" />
-            <h2>${p.Name}</h2>
-            <p>$${p.Price.toFixed(2)}</p>`;
-                    container.appendChild(div);
-                });
-            })
-            .catch(console.error);
+        async function fetchProducts() {
+            try {
+                const response = await fetch('http://localhost:5000/products');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const products = await response.json();
+                displayProducts(products);
+            } catch (error) {
+                console.error('There has been a problem with your fetch operation:', error);
+            }
+        }
+
+        function displayProducts(products) {
+            const productContainer = document.getElementById('products');
+            productContainer.innerHTML = '';
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <h2>${product.name}</h2>
+                    <img src="${product.image}" alt="${product.name}" />
+                    <p>Price: $${product.price}</p>
+                    <p>${product.description}</p>
+                `;
+                productContainer.appendChild(productCard);
+            });
+        }
+
+        // Fetch products on page load
+        window.onload = fetchProducts;
     </script>
 </body>
 
